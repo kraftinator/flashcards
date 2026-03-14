@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Let's Practise!</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;display:flex;align-items:center;justify-content:center}
+#app{width:100%;max-width:560px;padding:2rem 1.5rem;text-align:center}
+#top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
+#dots{display:flex;gap:8px;flex-wrap:wrap}
+.dot{width:14px;height:14px;border-radius:50%;background:#CECBF6;transition:background .3s}
+.dot.done{background:#7F77DD}
+#menu-link{display:none;font-size:13px;color:#888;background:none;border:none;cursor:pointer;padding:0}
+.w-card{background:#EEEDFE;border:1px solid #AFA9EC;border-radius:16px;padding:5rem 2rem;margin-bottom:2rem}
+.m-card{background:#EAF3DE;border:1px solid #97C459;border-radius:16px;padding:3.5rem 2rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:center;gap:12px}
+#word{font-size:clamp(64px,15vw,112px);font-weight:600;color:#3C3489;display:block}
+#m-prob{font-size:clamp(48px,11vw,72px);font-weight:600;color:#27500A}
+#m-ans{font-size:clamp(48px,11vw,72px);font-weight:600;width:80px;text-align:center;border:none;border-bottom:3px solid #3B6D11;background:transparent;color:#27500A;outline:none}
+.prog{font-size:15px;color:#888;margin-bottom:1.5rem}
+.btns{display:flex;gap:12px}
+.btn-got{flex:1;padding:20px;font-size:18px;font-weight:500;background:#EAF3DE;border:1px solid #639922;color:#27500A;border-radius:10px;cursor:pointer}
+.btn-try{flex:1;padding:20px;font-size:18px;font-weight:500;background:#FCEBEB;border:1px solid #A32D2D;color:#791F1F;border-radius:10px;cursor:pointer}
+.btn-got:hover{background:#d6ecbe}.btn-try:hover{background:#f7d0d0}
+.btn-menu-w{width:100%;padding:22px;font-size:20px;font-weight:500;background:#EEEDFE;border:1px solid #534AB7;color:#3C3489;border-radius:12px;cursor:pointer;margin-bottom:12px}
+.btn-menu-m{width:100%;padding:22px;font-size:20px;font-weight:500;background:#EAF3DE;border:1px solid #3B6D11;color:#27500A;border-radius:12px;cursor:pointer}
+.btn-menu-w:hover{background:#dddaf8}.btn-menu-m:hover{background:#d6ecbe}
+.btn-check{width:100%;padding:20px;font-size:18px;font-weight:500;background:#EAF3DE;border:1px solid #639922;color:#27500A;border-radius:10px;cursor:pointer}
+.btn-check:hover{background:#d6ecbe}
+.next-btn{padding:16px 40px;font-size:17px;background:#EEEDFE;border:1px solid #534AB7;color:#3C3489;border-radius:10px;cursor:pointer;margin:0 6px}
+.next-btn:hover{background:#dddaf8}
+.menu-btn{padding:16px 40px;font-size:17px;background:transparent;border:1px solid #B4B2A9;color:#5F5E5A;border-radius:10px;cursor:pointer;margin:0 6px}
+.menu-btn:hover{background:#f0efe8}
+#s-celebrate,#s-miss,#s-end,#s-card,#s-math{display:none}
+.cel-title{font-size:36px;font-weight:600;color:#534AB7;margin-bottom:2rem}
+.miss-title{font-size:30px;font-weight:600;color:#A32D2D;margin-bottom:.5rem}
+.miss-sub{font-size:16px;color:#888;margin-bottom:2rem}
+.stars{display:flex;gap:6px;justify-content:center;margin-bottom:1rem}
+@keyframes bounceIn{from{opacity:0;transform:scale(.8)}75%{transform:scale(1.07)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top-bar">
+    <div id="dots"></div>
+    <button id="menu-link" onclick="goMenu()">&larr; Menu</button>
+  </div>
+
+  <div id="s-menu">
+    <p style="font-size:26px;font-weight:600;color:#534AB7;margin:0 0 2rem">What shall we practise?</p>
+    <button class="btn-menu-w" onclick="startWords()">Red Words</button>
+    <button class="btn-menu-m" onclick="startMath()">Math</button>
+  </div>
+
+  <div id="s-card">
+    <p class="prog" id="w-prog"></p>
+    <div class="w-card"><span id="word"></span></div>
+    <div class="btns">
+      <button class="btn-got" onclick="wCorrect()">Got it!</button>
+      <button class="btn-try" onclick="wWrong()">Try again</button>
+    </div>
+  </div>
+
+  <div id="s-math">
+    <p class="prog" id="m-prog"></p>
+    <div class="m-card">
+      <span id="m-prob"></span>
+      <input id="m-ans" type="text" inputmode="numeric" maxlength="1"
+        oninput="this.value=this.value.replace(/[^0-9]/,'')"
+        onkeydown="if(event.key==='Enter')mCheck()">
+    </div>
+    <button class="btn-check" onclick="mCheck()">Check!</button>
+  </div>
+
+  <div id="s-celebrate">
+    <div class="stars" id="stars-top"></div>
+    <div id="cel-char" style="margin:0 auto .75rem"></div>
+    <p class="cel-title" id="cel-t"></p>
+    <button class="next-btn" id="cel-btn" onclick="next()">Next &rarr;</button>
+  </div>
+
+  <div id="s-miss">
+    <div style="width:100px;height:100px;border-radius:50%;background:#FCEBEB;border:2px solid #E24B4A;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+      <svg width="50" height="50" viewBox="0 0 50 50"><line x1="12" y1="12" x2="38" y2="38" stroke="#E24B4A" stroke-width="6" stroke-linecap="round"/><line x1="38" y1="12" x2="12" y2="38" stroke="#E24B4A" stroke-width="6" stroke-linecap="round"/></svg>
+    </div>
+    <p class="miss-title">Not quite!</p>
+    <p class="miss-sub">We will come back to that one</p>
+    <button class="next-btn" onclick="next()">Keep going &rarr;</button>
+  </div>
+
+  <div id="s-end">
+    <div id="end-char" style="margin:0 auto 1rem"></div>
+    <p class="cel-title">All done!</p>
+    <p class="miss-sub">You got every single one!</p>
+    <button class="next-btn" onclick="playAgain()">Play again &rarr;</button>
+    <button class="menu-btn" onclick="goMenu()">Menu</button>
+  </div>
+</div>
+
+<script>
+const W=['good','there','down','should','could','would','live','out','day','way','going','walk'];
+const MSGS=['Amazing!','Yes!','Brilliant!','You got it!','Superstar!','Fantastic!','Wow!','Well done!'];
+const MN=5;
+let mode,wDeck,wMastered,wIdx,wDone,mDeck,mMastered,mIdx,mDone;
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
+const ALL=['s-menu','s-card','s-math','s-celebrate','s-miss','s-end'];
+
+function show(id,anim='fadeUp .3s ease both'){
+  ALL.forEach(s=>document.getElementById(s).style.display='none');
+  const el=document.getElementById(id);el.style.display='block';el.style.animation='none';void el.offsetWidth;el.style.animation=anim;
+}
+function setDots(done,total){
+  document.getElementById('dots').innerHTML=Array(total).fill(0).map((_,i)=>`<div class="dot${i<done?' done':''}"></div>`).join('');
+}
+function showMenuLink(){document.getElementById('menu-link').style.display='block';}
+function goMenu(){document.getElementById('dots').innerHTML='';document.getElementById('menu-link').style.display='none';show('s-menu');}
+
+function startWords(){
+  mode='words';wDeck=shuf([...W]);wMastered=new Set();wIdx=0;wDone=false;
+  setDots(0,W.length);showMenuLink();showWord();
+}
+function showWord(){
+  if(wIdx>=wDeck.length){showEnd();return;}
+  document.getElementById('word').textContent=wDeck[wIdx];
+  document.getElementById('w-prog').textContent=wMastered.size+' of '+W.length+' learned';
+  show('s-card');
+}
+function wCorrect(){wMastered.add(wDeck[wIdx]);wIdx++;setDots(wMastered.size,W.length);celebrate(wMastered.size===W.length);}
+function wWrong(){const w=wDeck[wIdx];if(!wMastered.has(w))wDeck.push(w);wIdx++;setDots(wMastered.size,W.length);show('s-miss');}
+
+function genProbs(){
+  const ps=[];let zc=0;
+  while(ps.length<MN){
+    const add=Math.random()<.5;
+    let a=0|Math.random()*10,b,ans,op;
+    if(add){b=0|Math.random()*(10-a);ans=a+b;op='+';}
+    else{b=0|Math.random()*(a+1);ans=a-b;op='&minus;';}
+    if((a===0||b===0||ans===0)&&zc>=2)continue;
+    if(a===0||b===0||ans===0)zc++;
+    ps.push({a,b,op,ans});
+  }
+  return ps;
+}
+function startMath(){
+  mode='math';mDeck=genProbs();mMastered=new Set();mIdx=0;mDone=false;
+  setDots(0,MN);showMenuLink();showMath();
+}
+function showMath(){
+  if(mIdx>=mDeck.length){showEnd();return;}
+  const p=mDeck[mIdx];
+  document.getElementById('m-prob').innerHTML=p.a+' '+p.op+' '+p.b+' =';
+  document.getElementById('m-ans').value='';
+  document.getElementById('m-prog').textContent=mMastered.size+' of '+MN+' done';
+  show('s-math');
+  setTimeout(()=>document.getElementById('m-ans').focus(),100);
+}
+function mCheck(){
+  const v=parseInt(document.getElementById('m-ans').value.trim());
+  if(isNaN(v))return;
+  const p=mDeck[mIdx];
+  if(v===p.ans){
+    if(!mMastered.has(p))mMastered.add(p);
+    mIdx++;setDots(mMastered.size,MN);celebrate(mMastered.size===MN);
+  } else {
+    if(!mMastered.has(p))mDeck.push(p);
+    mIdx++;setDots(mMastered.size,MN);show('s-miss');
+  }
+}
+
+function celebrate(isEnd){
+  const useCat=Math.random()<.5,v=0|Math.random()*3;
+  document.getElementById('cel-char').innerHTML=useCat?CATS[v](100):UNIS[v](100);
+  document.getElementById('cel-t').textContent=MSGS[0|Math.random()*MSGS.length];
+  document.getElementById('stars-top').innerHTML=stars(3);
+  if(mode==='words')wDone=isEnd;else mDone=isEnd;
+  document.getElementById('cel-btn').textContent=isEnd?'See your prize! \u2192':'Next \u2192';
+  show('s-celebrate','bounceIn .4s ease both');
+}
+function next(){if(mode==='words'){wDone?showEnd():showWord();}else{mDone?showEnd():showMath();}}
+function showEnd(){document.getElementById('end-char').innerHTML=UNIS[0|Math.random()*3](120);show('s-end','bounceIn .5s ease both');}
+function playAgain(){if(mode==='words')startWords();else startMath();}
+
+function stars(n){return Array(n).fill(`<svg width="28" height="28" viewBox="0 0 20 20"><polygon points="10,2 12.4,7.6 18.5,8.1 14,12.1 15.5,18 10,14.9 4.5,18 6,12.1 1.5,8.1 7.6,7.6" fill="#FAC775"/></svg>`).join('');}
+
+const CATS=[
+  s=>`<svg width="${s}" height="${s}" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="18,32 28,54 8,54" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="1"/>
+    <polygon points="72,32 82,54 62,54" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="1"/>
+    <polygon points="20,35 26,50 14,50" fill="#F4C0D1"/><polygon points="70,35 76,50 64,50" fill="#F4C0D1"/>
+    <circle cx="45" cy="56" r="28" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="1"/>
+    <ellipse cx="36" cy="54" rx="5" ry="6" fill="#3C3489"/><ellipse cx="54" cy="54" rx="5" ry="6" fill="#3C3489"/>
+    <circle cx="38" cy="52" r="2" fill="white"/><circle cx="56" cy="52" r="2" fill="white"/>
+    <polygon points="45,62 42,58 48,58" fill="#F4C0D1"/>
+    <path d="M42,63 Q45,67 48,63" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="14" y1="62" x2="37" y2="64" stroke="#534AB7" stroke-width="1"/><line x1="14" y1="67" x2="37" y2="65" stroke="#534AB7" stroke-width="1"/>
+    <line x1="53" y1="64" x2="76" y2="62" stroke="#534AB7" stroke-width="1"/><line x1="53" y1="65" x2="76" y2="67" stroke="#534AB7" stroke-width="1"/>
+  </svg>`,
+  s=>`<svg width="${s}" height="${s}" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="18,32 28,54 8,54" fill="#FBEAF0" stroke="#ED93B1" stroke-width="1"/>
+    <polygon points="72,32 82,54 62,54" fill="#FBEAF0" stroke="#ED93B1" stroke-width="1"/>
+    <polygon points="20,35 26,50 14,50" fill="#FAC775"/><polygon points="70,35 76,50 64,50" fill="#FAC775"/>
+    <circle cx="45" cy="56" r="28" fill="#FBEAF0" stroke="#ED93B1" stroke-width="1"/>
+    <path d="M31,51 Q33,47 37,50 Q41,47 43,51 Q43,55 37,59 Q31,55 31,51Z" fill="#D4537E"/>
+    <path d="M47,51 Q49,47 53,50 Q57,47 59,51 Q59,55 53,59 Q47,55 47,51Z" fill="#D4537E"/>
+    <circle cx="34" cy="50" r="1.5" fill="white"/><circle cx="50" cy="50" r="1.5" fill="white"/>
+    <polygon points="45,63 42,59 48,59" fill="#FAC775"/>
+    <path d="M40,65 Q45,70 50,65" fill="none" stroke="#993556" stroke-width="2" stroke-linecap="round"/>
+    <line x1="14" y1="63" x2="37" y2="65" stroke="#D4537E" stroke-width="1"/><line x1="14" y1="68" x2="37" y2="66" stroke="#D4537E" stroke-width="1"/>
+    <line x1="53" y1="65" x2="76" y2="63" stroke="#D4537E" stroke-width="1"/><line x1="53" y1="66" x2="76" y2="68" stroke="#D4537E" stroke-width="1"/>
+  </svg>`,
+  s=>`<svg width="${s}" height="${s}" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="18,32 28,54 8,54" fill="#FAEEDA" stroke="#FAC775" stroke-width="1"/>
+    <polygon points="72,32 82,54 62,54" fill="#FAEEDA" stroke="#FAC775" stroke-width="1"/>
+    <polygon points="20,35 26,50 14,50" fill="#F4C0D1"/><polygon points="70,35 76,50 64,50" fill="#F4C0D1"/>
+    <circle cx="45" cy="56" r="28" fill="#FAEEDA" stroke="#FAC775" stroke-width="1"/>
+    <line x1="38" y1="34" x2="40" y2="44" stroke="#EF9F27" stroke-width="2" stroke-linecap="round"/>
+    <line x1="45" y1="32" x2="45" y2="42" stroke="#EF9F27" stroke-width="2" stroke-linecap="round"/>
+    <line x1="52" y1="34" x2="50" y2="44" stroke="#EF9F27" stroke-width="2" stroke-linecap="round"/>
+    <ellipse cx="36" cy="54" rx="5" ry="6" fill="#3C3489"/><ellipse cx="54" cy="54" rx="5" ry="6" fill="#3C3489"/>
+    <circle cx="38" cy="52" r="2" fill="white"/><circle cx="56" cy="52" r="2" fill="white"/>
+    <polygon points="45,62 42,58 48,58" fill="#F4C0D1"/>
+    <path d="M41,64 Q45,69 49,64" fill="none" stroke="#BA7517" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="14" y1="62" x2="37" y2="64" stroke="#BA7517" stroke-width="1"/><line x1="14" y1="67" x2="37" y2="65" stroke="#BA7517" stroke-width="1"/>
+    <line x1="53" y1="64" x2="76" y2="62" stroke="#BA7517" stroke-width="1"/><line x1="53" y1="65" x2="76" y2="67" stroke="#BA7517" stroke-width="1"/>
+  </svg>`
+];
+const UNIS=[
+  s=>`<svg width="${s}" height="${s}" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="45,4 39,30 51,30" fill="#FAC775" stroke="#EF9F27" stroke-width="1"/>
+    <ellipse cx="74" cy="44" rx="12" ry="20" fill="#F4C0D1" stroke="#ED93B1" stroke-width="1"/>
+    <ellipse cx="70" cy="37" rx="8" ry="14" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="1"/>
+    <circle cx="45" cy="55" r="28" fill="#FBEAF0" stroke="#ED93B1" stroke-width="1"/>
+    <circle cx="36" cy="53" r="6" fill="#993556"/><circle cx="54" cy="53" r="6" fill="#993556"/>
+    <circle cx="38" cy="51" r="2.5" fill="white"/><circle cx="56" cy="51" r="2.5" fill="white"/>
+    <ellipse cx="45" cy="63" rx="4" ry="3" fill="#F4C0D1"/>
+    <path d="M38,68 Q45,73 52,68" fill="none" stroke="#993556" stroke-width="1.5" stroke-linecap="round"/>
+    <polygon points="15,36 19,28 23,36" fill="#FAC775"/><polygon points="20,32 24,24 28,32" fill="#F4C0D1"/><polygon points="25,29 29,21 33,29" fill="#EEEDFE"/>
+  </svg>`,
+  s=>`<svg width="${s}" height="${s}" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="45,4 39,30 51,30" fill="#FAC775" stroke="#EF9F27" stroke-width="1"/>
+    <ellipse cx="74" cy="44" rx="12" ry="20" fill="#B5D4F4" stroke="#85B7EB" stroke-width="1"/>
+    <ellipse cx="70" cy="37" rx="8" ry="14" fill="#E6F1FB" stroke="#85B7EB" stroke-width="1"/>
+    <circle cx="45" cy="55" r="28" fill="#E6F1FB" stroke="#85B7EB" stroke-width="1"/>
+    <circle cx="36" cy="53" r="6" fill="#185FA5"/><circle cx="54" cy="53" r="6" fill="#185FA5"/>
+    <circle cx="38" cy="51" r="2.5" fill="white"/><circle cx="56" cy="51" r="2.5" fill="white"/>
+    <ellipse cx="45" cy="63" rx="4" ry="3" fill="#B5D4F4"/>
+    <path d="M38,68 Q45,73 52,68" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"/>
+    <polygon points="15,36 19,28 23,36" fill="#5DCAA5"/><polygon points="20,32 24,24 28,32" fill="#85B7EB"/>
+    <polygon points="25,29 29,21 33,29" fill="#FAC775"/><polygon points="18,26 21,20 24,26" fill="#F4C0D1"/>
+    <polygon points="67,25 70,19 73,25" fill="#FAC775"/><polygon points="22,74 25,70 28,74" fill="#5DCAA5"/>
+  </svg>`,
+  s=>`<svg width="${s}" height="${s}" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="45,4 39,30 51,30" fill="#EF9F27" stroke="#BA7517" stroke-width="1"/>
+    <polygon points="57,22 76,34 60,50" fill="#F09595"/><polygon points="60,28 77,41 63,55" fill="#FAC775"/><polygon points="62,34 78,48 65,60" fill="#9FE1CB"/>
+    <circle cx="45" cy="55" r="28" fill="#FBEAF0" stroke="#F4C0D1" stroke-width="1"/>
+    <circle cx="36" cy="53" r="6" fill="#993556"/><circle cx="54" cy="53" r="6" fill="#993556"/>
+    <circle cx="38" cy="51" r="2.5" fill="white"/><circle cx="56" cy="51" r="2.5" fill="white"/>
+    <ellipse cx="45" cy="63" rx="4" ry="3" fill="#F4C0D1"/>
+    <path d="M38,68 Q45,73 52,68" fill="none" stroke="#993556" stroke-width="1.5" stroke-linecap="round"/>
+    <polygon points="14,40 17,33 20,40" fill="#FAC775"/><polygon points="18,36 21,29 24,36" fill="#F09595"/><polygon points="22,33 25,26 28,33" fill="#9FE1CB"/>
+  </svg>`
+];
+
+goMenu();
+</script>
+</body>
+</html>
