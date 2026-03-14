@@ -50,7 +50,7 @@ body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;displa
 
   <div id="s-menu">
     <p style="font-size:26px;font-weight:600;color:#534AB7;margin:0 0 2rem">What shall we practise?</p>
-    <button class="btn-menu-w" onclick="startWords()">Red Words</button>
+    <div id="word-buttons"></div>
     <button class="btn-menu-m" onclick="startMath()">Math</button>
   </div>
 
@@ -100,7 +100,14 @@ body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;displa
 </div>
 
 <script>
-const W=['good','there','down','should','could','would','live','out','day','way','going','walk'];
+const WORD_SETS=[
+  {name:'Red Words - Main', words:['good','there','down','should','could','would','live','out','day','way','going','walk']},
+  {name:'Red Words 1', words:['were','does','some','done','her','here','under','onto','people','saw','both']},
+  {name:'Red Words 2', words:['over','love','too','eye','all','again','boy','girl','sign','your','which']},
+  {name:'Red Words 3', words:['look','also','use','today','yesterday','first','around','say','their','how','once']},
+  {name:'Red Words 4', words:['another','pull','wash','every','everyone','know','knew','friend','been','our','other']},
+];
+let W,wSetIdx;
 const MSGS=['Amazing!','Yes!','Brilliant!','You got it!','Superstar!','Fantastic!','Wow!','Well done!'];
 const MN=5;
 let mode,wDeck,wMastered,wIdx,wDone,mDeck,mMastered,mIdx,mDone;
@@ -117,7 +124,8 @@ function setDots(done,total){
 function showMenuLink(){document.getElementById('menu-link').style.display='block';}
 function goMenu(){document.getElementById('dots').innerHTML='';document.getElementById('menu-link').style.display='none';show('s-menu');}
 
-function startWords(){
+function startWords(idx){
+  wSetIdx=idx;W=WORD_SETS[idx].words;
   mode='words';wDeck=shuf([...W]);wMastered=new Set();wIdx=0;wDone=false;
   setDots(0,W.length);showMenuLink();showWord();
 }
@@ -180,7 +188,7 @@ function celebrate(isEnd){
 }
 function next(){if(mode==='words'){wDone?showEnd():showWord();}else{mDone?showEnd():showMath();}}
 function showEnd(){document.getElementById('end-char').innerHTML=UNIS[0|Math.random()*3](120);show('s-end','bounceIn .5s ease both');}
-function playAgain(){if(mode==='words')startWords();else startMath();}
+function playAgain(){if(mode==='words')startWords(wSetIdx);else startMath();}
 
 function stars(n){return Array(n).fill(`<svg width="28" height="28" viewBox="0 0 20 20"><polygon points="10,2 12.4,7.6 18.5,8.1 14,12.1 15.5,18 10,14.9 4.5,18 6,12.1 1.5,8.1 7.6,7.6" fill="#FAC775"/></svg>`).join('');}
 
@@ -263,6 +271,9 @@ const UNIS=[
   </svg>`
 ];
 
+document.getElementById('word-buttons').innerHTML=WORD_SETS.map((s,i)=>
+  `<button class="btn-menu-w" onclick="startWords(${i})">${s.name}</button>`
+).join('');
 goMenu();
 </script>
 </body>
