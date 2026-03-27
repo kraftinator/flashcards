@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Let's Practise!</title>
+<title>Let's Practice!</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;display:flex;align-items:center;justify-content:center}
@@ -49,7 +49,7 @@ body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;displa
   </div>
 
   <div id="s-menu">
-    <p style="font-size:26px;font-weight:600;color:#534AB7;margin:0 0 2rem">What shall we practise?</p>
+    <p style="font-size:26px;font-weight:600;color:#534AB7;margin:0 0 2rem">What shall we practice?</p>
     <div id="word-buttons"></div>
     <button class="btn-menu-m" onclick="startMath()">Math</button>
   </div>
@@ -98,6 +98,7 @@ body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;displa
     <button class="menu-btn" onclick="goMenu()">Menu</button>
   </div>
 </div>
+<canvas id="confetti" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999"></canvas>
 
 <script>
 const WORD_SETS=[
@@ -122,7 +123,7 @@ function setDots(done,total){
   document.getElementById('dots').innerHTML=Array(total).fill(0).map((_,i)=>`<div class="dot${i<done?' done':''}"></div>`).join('');
 }
 function showMenuLink(){document.getElementById('menu-link').style.display='block';}
-function goMenu(){document.getElementById('dots').innerHTML='';document.getElementById('menu-link').style.display='none';show('s-menu');}
+function goMenu(){stopConfetti();document.getElementById('dots').innerHTML='';document.getElementById('menu-link').style.display='none';show('s-menu');}
 
 function startWords(idx){
   wSetIdx=idx;W=WORD_SETS[idx].words;
@@ -178,17 +179,17 @@ function mCheck(){
 }
 
 function celebrate(isEnd){
-  const useCat=Math.random()<.5,v=0|Math.random()*3;
-  document.getElementById('cel-char').innerHTML=useCat?CATS[v](100):UNIS[v](100);
+  const v=0|Math.random()*3;
+  document.getElementById('cel-char').innerHTML=CATS[v](100);
   document.getElementById('cel-t').textContent=MSGS[0|Math.random()*MSGS.length];
   document.getElementById('stars-top').innerHTML=stars(3);
   if(mode==='words')wDone=isEnd;else mDone=isEnd;
   document.getElementById('cel-btn').textContent=isEnd?'See your prize! \u2192':'Next \u2192';
   show('s-celebrate','bounceIn .4s ease both');
 }
-function next(){if(mode==='words'){wDone?showEnd():showWord();}else{mDone?showEnd():showMath();}}
-function showEnd(){document.getElementById('end-char').innerHTML=UNIS[0|Math.random()*3](120);show('s-end','bounceIn .5s ease both');}
-function playAgain(){if(mode==='words')startWords(wSetIdx);else startMath();}
+function next(){stopConfetti();if(mode==='words'){wDone?showEnd():showWord();}else{mDone?showEnd():showMath();}}
+function showEnd(){document.getElementById('end-char').innerHTML=CATS[0|Math.random()*3](120);launchConfetti();show('s-end','bounceIn .5s ease both');}
+function playAgain(){stopConfetti();if(mode==='words')startWords(wSetIdx);else startMath();}
 
 function stars(n){return Array(n).fill(`<svg width="28" height="28" viewBox="0 0 20 20"><polygon points="10,2 12.4,7.6 18.5,8.1 14,12.1 15.5,18 10,14.9 4.5,18 6,12.1 1.5,8.1 7.6,7.6" fill="#FAC775"/></svg>`).join('');}
 
@@ -270,6 +271,46 @@ const UNIS=[
     <polygon points="14,40 17,33 20,40" fill="#FAC775"/><polygon points="18,36 21,29 24,36" fill="#F09595"/><polygon points="22,33 25,26 28,33" fill="#9FE1CB"/>
   </svg>`
 ];
+
+let confettiFrame,confettiPieces=[],confettiCtx,confettiCv;
+const confettiColors=['#FAC775','#F4C0D1','#AFA9EC','#9FE1CB','#85B7EB','#F09595','#7F77DD','#5DCAA5'];
+function mkPiece(){
+  return {
+    x:confettiCv.width*Math.random(),y:-10-Math.random()*20,
+    w:6+Math.random()*6,h:4+Math.random()*4,
+    vx:(Math.random()-.5)*2,vy:1.5+Math.random()*3,
+    rot:Math.random()*Math.PI*2,rv:(Math.random()-.5)*.2,
+    c:confettiColors[0|Math.random()*confettiColors.length],
+    a:1
+  };
+}
+function confettiDraw(){
+  confettiCtx.clearRect(0,0,confettiCv.width,confettiCv.height);
+  for(let i=0;i<2;i++)confettiPieces.push(mkPiece());
+  confettiPieces=confettiPieces.filter(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.08;p.rot+=p.rv;
+    if(p.y>confettiCv.height)return false;
+    confettiCtx.save();confettiCtx.translate(p.x,p.y);confettiCtx.rotate(p.rot);
+    confettiCtx.fillStyle=p.c;
+    confettiCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    confettiCtx.restore();
+    return true;
+  });
+  confettiFrame=requestAnimationFrame(confettiDraw);
+}
+function launchConfetti(){
+  confettiCv=document.getElementById('confetti');confettiCtx=confettiCv.getContext('2d');
+  confettiCv.width=window.innerWidth;confettiCv.height=window.innerHeight;
+  if(confettiFrame)return;
+  confettiPieces=[];
+  for(let i=0;i<40;i++)confettiPieces.push(mkPiece());
+  confettiDraw();
+}
+function stopConfetti(){
+  if(confettiFrame){cancelAnimationFrame(confettiFrame);confettiFrame=null;}
+  confettiPieces=[];
+  if(confettiCtx)confettiCtx.clearRect(0,0,confettiCv.width,confettiCv.height);
+}
 
 document.getElementById('word-buttons').innerHTML=WORD_SETS.map((s,i)=>
   `<button class="btn-menu-w" onclick="startWords(${i})">${s.name}</button>`
