@@ -57,6 +57,7 @@ body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;displa
     <button class="btn-menu-m" onclick="startMath2()">Math 2</button>
     <button class="btn-menu-m" onclick="startNumbers()">Numbers</button>
     <button class="btn-menu-m" onclick="startNumbers2()">Numbers 2</button>
+    <button class="btn-menu-m" onclick="startNumbers3()">Numbers 3</button>
   </div>
 
   <div id="s-card">
@@ -199,6 +200,12 @@ function startNumbers2(){
   nMastered=new Set();nIdx=0;nDone=false;
   setDots(0,MN);showMenuLink();showNumber();
 }
+function startNumbers3(){
+  const pool=[];for(let i=10;i<=100;i++)pool.push(i);
+  mode='numbers3';nDeck=shuf(pool).slice(0,MN);
+  nMastered=new Set();nIdx=0;nDone=false;
+  setDots(0,MN);showMenuLink();showNumber();
+}
 function showNumber(){
   if(nIdx>=nDeck.length){showEnd();return;}
   document.getElementById('n-num').textContent=nDeck[nIdx];
@@ -240,13 +247,13 @@ function celebrate(isEnd){
   document.getElementById('cel-char').innerHTML=CATS[v](100);
   document.getElementById('cel-t').textContent=MSGS[0|Math.random()*MSGS.length];
   document.getElementById('stars-top').innerHTML=stars(3);
-  if(mode==='words')wDone=isEnd;else if(mode==='numbers'||mode==='numbers2')nDone=isEnd;else mDone=isEnd;
+  if(mode==='words')wDone=isEnd;else if(mode==='numbers'||mode==='numbers2'||mode==='numbers3')nDone=isEnd;else mDone=isEnd;
   document.getElementById('cel-btn').textContent=isEnd?'See your prize! \u2192':'Next \u2192';
   show('s-celebrate','bounceIn .4s ease both');
 }
-function next(){stopConfetti();if(mode==='words'){wDone?showEnd():showWord();}else if(mode==='numbers'||mode==='numbers2'){nDone?showEnd():showNumber();}else{mDone?showEnd():showMath();}}
+function next(){stopConfetti();if(mode==='words'){wDone?showEnd():showWord();}else if(mode==='numbers'||mode==='numbers2'||mode==='numbers3'){nDone?showEnd():showNumber();}else{mDone?showEnd():showMath();}}
 function showEnd(){document.getElementById('end-char').innerHTML=CATS[0|Math.random()*3](120);launchConfetti();show('s-end','bounceIn .5s ease both');}
-function playAgain(){stopConfetti();if(mode==='words')startWords(wSetIdx);else if(mode==='math2')startMath2();else if(mode==='numbers')startNumbers();else if(mode==='numbers2')startNumbers2();else startMath();}
+function playAgain(){stopConfetti();if(mode==='words')startWords(wSetIdx);else if(mode==='math2')startMath2();else if(mode==='numbers')startNumbers();else if(mode==='numbers2')startNumbers2();else if(mode==='numbers3')startNumbers3();else startMath();}
 
 function stars(n){return Array(n).fill(`<svg width="28" height="28" viewBox="0 0 20 20"><polygon points="10,2 12.4,7.6 18.5,8.1 14,12.1 15.5,18 10,14.9 4.5,18 6,12.1 1.5,8.1 7.6,7.6" fill="#FAC775"/></svg>`).join('');}
 
