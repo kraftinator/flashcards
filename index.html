@@ -160,12 +160,15 @@ function startMath(){
   setDots(0,MN);showMenuLink();showMath();
 }
 function genProbs2(){
-  const ps=[];
+  const ps=[],seen=new Set();
   while(ps.length<MN){
     const add=Math.random()<.5;
     let a,ans,op;
     if(add){a=10*(1+(0|Math.random()*9));ans=a+10;op='+';}        // 10..90 + 10 = 20..100
     else   {a=10*(2+(0|Math.random()*9));ans=a-10;op='&minus;';}  // 20..100 - 10 = 10..90
+    const key=a+op;
+    if(seen.has(key))continue;
+    seen.add(key);
     ps.push({a,b:10,op,ans});
   }
   return ps;
