@@ -32,7 +32,8 @@ body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;displa
 .next-btn:hover{background:#dddaf8}
 .menu-btn{padding:16px 40px;font-size:17px;background:transparent;border:1px solid #B4B2A9;color:#5F5E5A;border-radius:10px;cursor:pointer;margin:0 6px}
 .menu-btn:hover{background:#f0efe8}
-#s-celebrate,#s-miss,#s-end,#s-card,#s-math{display:none}
+#s-celebrate,#s-miss,#s-end,#s-card,#s-math,#s-num{display:none}
+#n-num{font-size:clamp(96px,22vw,160px);font-weight:600;color:#27500A}
 .cel-title{font-size:36px;font-weight:600;color:#534AB7;margin-bottom:2rem}
 .miss-title{font-size:30px;font-weight:600;color:#A32D2D;margin-bottom:.5rem}
 .miss-sub{font-size:16px;color:#888;margin-bottom:2rem}
@@ -54,6 +55,7 @@ body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;displa
     <div id="word-buttons"></div>
     <button class="btn-menu-m" onclick="startMath()">Math</button>
     <button class="btn-menu-m" onclick="startMath2()">Math 2</button>
+    <button class="btn-menu-m" onclick="startNumbers()">Numbers</button>
   </div>
 
   <div id="s-card">
@@ -74,6 +76,15 @@ body{font-family:system-ui,sans-serif;background:#F8F6FF;min-height:100vh;displa
         onkeydown="if(event.key==='Enter')mCheck()">
     </div>
     <button class="btn-check" onclick="mCheck()">Check!</button>
+  </div>
+
+  <div id="s-num">
+    <p class="prog" id="n-prog"></p>
+    <div class="m-card"><span id="n-num"></span></div>
+    <div class="btns">
+      <button class="btn-got" onclick="nCorrect()">Got it!</button>
+      <button class="btn-try" onclick="nWrong()">Try again</button>
+    </div>
   </div>
 
   <div id="s-celebrate">
@@ -114,9 +125,9 @@ const WORD_SETS=[
 let W,wSetIdx;
 const MSGS=['Amazing!','Yes!','Brilliant!','You got it!','Superstar!','Fantastic!','Wow!','Well done!'];
 const MN=5;
-let mode,wDeck,wMastered,wIdx,wDone,mDeck,mMastered,mIdx,mDone;
+let mode,wDeck,wMastered,wIdx,wDone,mDeck,mMastered,mIdx,mDone,nDeck,nMastered,nIdx,nDone;
 const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
-const ALL=['s-menu','s-card','s-math','s-celebrate','s-miss','s-end'];
+const ALL=['s-menu','s-card','s-math','s-num','s-celebrate','s-miss','s-end'];
 
 function show(id,anim='fadeUp .3s ease both'){
   ALL.forEach(s=>document.getElementById(s).style.display='none');
@@ -177,6 +188,25 @@ function startMath2(){
   mode='math2';mDeck=genProbs2();mMastered=new Set();mIdx=0;mDone=false;
   setDots(0,MN);showMenuLink();showMath();
 }
+function startNumbers(){
+  mode='numbers';nDeck=shuf([10,11,12,13,14,15,16,17,18,19]).slice(0,MN);
+  nMastered=new Set();nIdx=0;nDone=false;
+  setDots(0,MN);showMenuLink();showNumber();
+}
+function showNumber(){
+  if(nIdx>=nDeck.length){showEnd();return;}
+  document.getElementById('n-num').textContent=nDeck[nIdx];
+  document.getElementById('n-prog').textContent=nMastered.size+' of '+MN+' done';
+  show('s-num');
+}
+function nCorrect(){
+  const n=nDeck[nIdx];if(!nMastered.has(n))nMastered.add(n);
+  nIdx++;setDots(nMastered.size,MN);celebrate(nMastered.size===MN);
+}
+function nWrong(){
+  const n=nDeck[nIdx];if(!nMastered.has(n))nDeck.push(n);
+  nIdx++;setDots(nMastered.size,MN);show('s-miss');
+}
 function showMath(){
   if(mIdx>=mDeck.length){showEnd();return;}
   const p=mDeck[mIdx];
@@ -204,13 +234,13 @@ function celebrate(isEnd){
   document.getElementById('cel-char').innerHTML=CATS[v](100);
   document.getElementById('cel-t').textContent=MSGS[0|Math.random()*MSGS.length];
   document.getElementById('stars-top').innerHTML=stars(3);
-  if(mode==='words')wDone=isEnd;else mDone=isEnd;
+  if(mode==='words')wDone=isEnd;else if(mode==='numbers')nDone=isEnd;else mDone=isEnd;
   document.getElementById('cel-btn').textContent=isEnd?'See your prize! \u2192':'Next \u2192';
   show('s-celebrate','bounceIn .4s ease both');
 }
-function next(){stopConfetti();if(mode==='words'){wDone?showEnd():showWord();}else{mDone?showEnd():showMath();}}
+function next(){stopConfetti();if(mode==='words'){wDone?showEnd():showWord();}else if(mode==='numbers'){nDone?showEnd():showNumber();}else{mDone?showEnd():showMath();}}
 function showEnd(){document.getElementById('end-char').innerHTML=CATS[0|Math.random()*3](120);launchConfetti();show('s-end','bounceIn .5s ease both');}
-function playAgain(){stopConfetti();if(mode==='words')startWords(wSetIdx);else if(mode==='math2')startMath2();else startMath();}
+function playAgain(){stopConfetti();if(mode==='words')startWords(wSetIdx);else if(mode==='math2')startMath2();else if(mode==='numbers')startNumbers();else startMath();}
 
 function stars(n){return Array(n).fill(`<svg width="28" height="28" viewBox="0 0 20 20"><polygon points="10,2 12.4,7.6 18.5,8.1 14,12.1 15.5,18 10,14.9 4.5,18 6,12.1 1.5,8.1 7.6,7.6" fill="#FAC775"/></svg>`).join('');}
 
